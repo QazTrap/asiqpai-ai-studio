@@ -1,0 +1,43 @@
+name: Deploy ASIQPAI Studio Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download studio-test branch
+        run: |
+          git clone --depth 1 --branch studio-test https://github.com/QazTrap/asiqpai.git site
+          rm -rf site/.git
+          rm -f site/CNAME
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Studio site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy Studio
+        id: deployment
+        uses: actions/deploy-pages@v4
